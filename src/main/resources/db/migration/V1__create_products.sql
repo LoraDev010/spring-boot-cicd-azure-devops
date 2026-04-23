@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY,
+  sku VARCHAR(64) NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  price NUMERIC(12,2) NOT NULL,
+  currency CHAR(3) NOT NULL
+);

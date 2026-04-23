@@ -1,4 +1,4 @@
-﻿package com.acme.cicd;
+package com.acme.cicd;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

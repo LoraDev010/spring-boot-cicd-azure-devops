@@ -1,3 +1,22 @@
 spring:
   application:
-    name: ci-cd
+    name: spring-boot-cicd-azure-devops
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:cicd_db}
+    username: ${DB_USER:app}
+    password: ${DB_PASS:app}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

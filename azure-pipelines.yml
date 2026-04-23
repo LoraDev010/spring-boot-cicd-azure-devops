@@ -1,0 +1,74 @@
+﻿trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  MAVEN_CACHE_FOLDER: $(HOME)/.m2/repository
+
+stages:
+  - stage: Build
+    displayName: CI
+    jobs:
+      - job: ci
+        displayName: Build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: Cache@2
+            displayName: Cache Maven local repo
+            inputs:
+              key: 'maven | "$(Agent.OS)" | **/pom.xml'
+              restoreKeys: |
+                maven | "$(Agent.OS)"
+              path: $(MAVEN_CACHE_FOLDER)
+
+          - script: chmod +x mvnw
+            displayName: Ensure mvnw executable
+
+          - script: ./mvnw -B -ntp -q -DskipTests package
+            displayName: Maven package (skip tests)
+
+  - stage: Deploy
+    displayName: CD (self-host)
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: deploy_local
+        displayName: Deploy with Docker Compose
+        environment: cicd-local
+        pool:
+          name: selfhost-linux
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  fetchDepth: 1
+
+                - script: chmod +x mvnw
+                  displayName: Ensure mvnw executable
+
+                - script: ./mvnw -B -ntp -q -DskipTests package
+                  displayName: Build jar
+
+                - script: docker compose -f deploy/compose.yaml build
+                  displayName: Docker build
+
+                - script: docker compose -f deploy/compose.yaml up -d --remove-orphans
+                  displayName: Docker up
+
+                - script: bash deploy/smoke.sh
+                  displayName: Smoke tests
+
+                - script: docker compose -f deploy/compose.yaml logs --no-color
+                  displayName: Logs (always)
+                  condition: always()

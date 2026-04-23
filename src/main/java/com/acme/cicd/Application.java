@@ -1,4 +1,4 @@
-﻿package com.acme.cicd;
+package com.acme.cicd;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
