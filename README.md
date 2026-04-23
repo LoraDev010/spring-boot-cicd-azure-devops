@@ -465,7 +465,7 @@ Este proyecto es educativo y está disponible bajo MIT License.
 
 ## ✍️ Autores / Contribuidores
 
-- **Creador:** [Tu nombre]
+- **Creador:** LoraDev10
 - **Última actualización:** 22 de Abril de 2026
 
 ---
