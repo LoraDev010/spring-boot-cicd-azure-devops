@@ -8,34 +8,23 @@ pr:
     include:
       - main
 
-variables:
-  MAVEN_CACHE_FOLDER: $(HOME)/.m2/repository
-
 stages:
   - stage: Build
     displayName: CI
     jobs:
       - job: ci
-        displayName: Build
+        displayName: Build, Test & Verify
         pool:
-          vmImage: ubuntu-latest
+          name: selfhost-linux
         steps:
           - checkout: self
             fetchDepth: 1
 
-          - task: Cache@2
-            displayName: Cache Maven local repo
-            inputs:
-              key: 'maven | "$(Agent.OS)" | **/pom.xml'
-              restoreKeys: |
-                maven | "$(Agent.OS)"
-              path: $(MAVEN_CACHE_FOLDER)
-
           - script: chmod +x mvnw
             displayName: Ensure mvnw executable
 
-          - script: ./mvnw -B -ntp -q -DskipTests package
-            displayName: Maven package (skip tests)
+          - script: ./mvnw -B -ntp verify
+            displayName: Maven verify (tests + spotless + jacoco)
 
   - stage: Deploy
     displayName: CD (self-host)
@@ -58,7 +47,7 @@ stages:
                   displayName: Ensure mvnw executable
 
                 - script: ./mvnw -B -ntp -q -DskipTests package
-                  displayName: Build jar
+                  displayName: Build jar (tests already ran in CI)
 
                 - script: docker compose -f deploy/compose.yaml build
                   displayName: Docker build
