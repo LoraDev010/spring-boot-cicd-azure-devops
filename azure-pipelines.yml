@@ -26,7 +26,7 @@ stages:
           - script: ./mvnw -B -ntp verify
             displayName: Maven verify (tests + spotless + jacoco)
             env:
-              DOCKER_HOST: unix:///var/run/docker.sock
+              DOCKER_HOST: tcp://localhost:2375
               TESTCONTAINERS_RYUK_DISABLED: "true"
 
   - stage: Deploy
