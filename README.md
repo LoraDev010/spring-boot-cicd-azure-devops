@@ -1,190 +1,75 @@
-# Mini CI/CD Azure DevOps - Guía de Configuración
+# Spring Boot CI/CD — Azure DevOps
 
-## 🎯 Descripción del Proyecto
-
-Proyecto educativo implementando **Clean Architecture + SOLID + Tests automatizados** en Java 21 con Spring Boot 4.0.5.
-
-**Características principales:**
-- ✅ Clean/Hexagonal Architecture con 3 capas (domain, application, infrastructure)
-- ✅ API REST con CRUD de productos
-- ✅ PostgreSQL + Flyway (migraciones versionadas)
-- ✅ Tests: Unit (Mockito) + Architecture (ArchUnit)
-- ✅ Docker Compose (local development)
-- ✅ Azure DevOps YAML pipeline (CI en ubuntu-latest, CD en self-hosted Linux)
-- ✅ Swagger UI (OpenAPI) en `/swagger-ui.html`
+Proyecto educativo que implementa **Hexagonal Architecture** con Java 21 + Spring Boot 4.0.5 + PostgreSQL, con un pipeline CI/CD completo en Azure DevOps que bloquea merges a `main` si el pipeline falla.
 
 ---
 
-## 📋 Requisitos Previos
+## Stack
 
-### Opción 1: Solo código (sin Docker)
-- **Java 21+** - [Descargar](https://www.oracle.com/java/technologies/downloads/#java21)
-- **Maven 3.9+** - Incluido (mvnw.cmd/mvnw)
-- **Git** - Para clonar el repo
+| Tecnología | Versión | Rol |
+|-----------|---------|-----|
+| Java | 21 | Lenguaje |
+| Spring Boot | 4.0.5 | Framework web + DI |
+| PostgreSQL | 16 | Base de datos |
+| Flyway | incluido en Boot | Migraciones de BD |
+| TestContainers | 1.21.0 | Tests de integración con BD real |
+| ArchUnit | 1.4.1 | Validación de arquitectura |
+| JaCoCo | 0.8.13 | Cobertura de código (mín. 70%) |
+| Spotless | 2.44.0 | Formato de código (Google Java Format) |
+| Docker + Compose | 27.5.1 | Contenedores |
+| Azure DevOps | - | CI/CD pipeline |
 
-### Opción 2: Con Docker (recomendado)
-- **Docker Desktop** - [Descargar](https://www.docker.com/products/docker-desktop)
-- **Docker Compose** - Incluido en Docker Desktop
+---
+
+## Prerequisitos
+
+- **Java 21+** instalado
+- **Docker Engine** corriendo (Linux/WSL2) o Docker Desktop (Mac/Windows)
 - **Git**
 
----
-
-## 🚀 Instalación y Ejecución
-
-### 1️⃣ Clonar el Repositorio
-
-```bash
-git clone https://github.com/tu-usuario/mini-cicd-azuredevops.git
-cd mini-cicd-azuredevops
-```
+No necesitas instalar Maven — el proyecto incluye `mvnw` (Maven Wrapper).
 
 ---
 
-### 2️⃣ Opción A: Compilar y Ejecutar Tests (sin BD)
+## Ejecución local rápida
 
-#### Windows (CMD)
+### 1. Clonar
+
 ```bash
-# Verificar Maven
-.\mvnw.cmd -v
-
-# Compilar
-.\mvnw.cmd clean package -DskipTests
-
-# Tests unitarios + architecture
-.\mvnw.cmd test
-
-# O solo tests específicos
-.\mvnw.cmd test -Dtest=GetProductServiceTest
-.\mvnw.cmd test -Dtest=CreateProductServiceTest
-.\mvnw.cmd test -Dtest=ArchitectureTest
+git clone https://github.com/LoraDev010/spring-boot-cicd-azure-devops.git
+cd spring-boot-cicd-azure-devops
 ```
 
-#### Linux/Mac
-```bash
-# Verificar Maven
-./mvnw -v
+### 2. Levantar con Docker Compose (recomendado)
 
+```bash
+# Construir imagen + levantar PostgreSQL + app
+docker compose -f deploy/compose.yaml up -d --build
+
+# Verificar que todo está OK
+bash deploy/smoke.sh
+# Debe mostrar: Smoke OK
+```
+
+### 3. Levantar solo la app (requiere PostgreSQL externo)
+
+```bash
 # Compilar
 ./mvnw clean package -DskipTests
 
-# Tests
-./mvnw test
+# Levantar (con variables de entorno apuntando a tu PostgreSQL)
+DB_HOST=localhost DB_PORT=5432 DB_NAME=cicd_db DB_USER=app DB_PASS=app \
+  java -jar target/*.jar
 ```
 
 ---
 
-### 3️⃣ Opción B: Docker Compose (Local Development - Recomendado)
+## API
 
-#### Windows (PowerShell)
-```powershell
-# Posicionarse en el directorio del proyecto
-cd mini-cicd-azuredevops
+Base URL: `http://localhost:8080`
 
-# Construir imagen Docker + levantar contenedores
-docker compose -f deploy/compose.yaml up -d --build
+### Crear producto
 
-# Esperar ~10 segundos a que PostgreSQL inicie
-
-# Ejecutar smoke tests (valida que todo esté OK)
-bash deploy/smoke.sh
-
-# Ver logs
-docker compose -f deploy/compose.yaml logs app
-
-# Detener servicios
-docker compose -f deploy/compose.yaml down
-```
-
-#### Linux/Mac
-```bash
-cd mini-cicd-azuredevops
-docker compose -f deploy/compose.yaml up -d --build
-sleep 10
-bash deploy/smoke.sh
-docker compose -f deploy/compose.yaml logs app
-docker compose -f deploy/compose.yaml down
-```
-
----
-
-## 📊 Estructura del Proyecto
-
-```
-mini-cicd-azuredevops/
-├── pom.xml                                  # Configuración Maven
-├── mvnw / mvnw.cmd                         # Maven Wrapper (sin install global)
-├── .mvn/                                   # Config del wrapper
-│
-├── src/
-│   ├── main/
-│   │   ├── java/com/acme/cicd/
-│   │   │   ├── Application.java            # Entry point Spring Boot
-│   │   │   └── product/
-│   │   │       ├── domain/                 # CORE: Sin Spring, sin JPA
-│   │   │       │   └── Product.java        # Entidad de negocio
-│   │   │       │
-│   │   │       ├── application/            # Casos de uso
-│   │   │       │   ├── CreateProductService.java
-│   │   │       │   ├── GetProductService.java
-│   │   │       │   ├── DuplicateSkuException.java
-│   │   │       │   ├── ProductNotFoundException.java
-│   │   │       │   └── port/               # Puertos (interfaces)
-│   │   │       │       ├── in/             # Puertos de entrada
-│   │   │       │       │   ├── CreateProductUseCase.java
-│   │   │       │       │   ├── CreateProductCommand.java
-│   │   │       │       │   └── GetProductUseCase.java
-│   │   │       │       └── out/            # Puertos de salida
-│   │   │       │           └── ProductRepositoryPort.java
-│   │   │       │
-│   │   │       └── infrastructure/         # Adaptadores (Spring, JPA, etc)
-│   │   │           ├── web/                # HTTP Adapters
-│   │   │           │   ├── ProductsController.java
-│   │   │           │   ├── CreateProductRequest.java
-│   │   │           │   ├── ProductResponse.java
-│   │   │           │   └── RestExceptionHandler.java
-│   │   │           │
-│   │   │           └── persistence/        # Persistencia Adapters
-│   │   │               └── jpa/
-│   │   │                   ├── ProductJpaEntity.java
-│   │   │                   ├── ProductJpaRepository.java
-│   │   │                   └── ProductPersistenceAdapter.java
-│   │   │
-│   │   └── resources/
-│   │       ├── application.yaml            # Config (DB, puertos, etc)
-│   │       └── db/migration/
-│   │           └── V1__create_products.sql # Flyway migration
-│   │
-│   └── test/
-│       └── java/com/acme/cicd/product/
-│           ├── application/
-│           │   ├── GetProductServiceTest.java      # Unit tests Mockito
-│           │   └── CreateProductServiceTest.java
-│           │
-│           └── ArchitectureTest.java               # Tests de arquitectura
-│
-├── deploy/
-│   ├── compose.yaml                 # Docker Compose (PostgreSQL + App)
-│   ├── smoke.sh                     # Smoke tests (validación E2E)
-│   └── .env.example                 # Variables de entorno
-│
-├── Dockerfile                       # Imagen Spring Boot
-├── azure-pipelines.yml              # CI/CD Pipeline (Azure DevOps)
-├── .github/                         # GitHub workflows (opcional)
-└── README.md                        # Este archivo
-```
-
----
-
-## 🔧 Endpoints Disponibles
-
-### Health Check
-```bash
-GET http://localhost:8080/actuator/health
-```
-
-### API Productos
-
-#### Crear producto
 ```bash
 POST /products
 Content-Type: application/json
@@ -193,287 +78,198 @@ Content-Type: application/json
   "sku": "SKU-001",
   "name": "Laptop Pro",
   "price": 1299.99,
-  "currency": "USD"
+  "currency": "USD",
+  "stock": 50
 }
 
-# Response (201 Created)
+# Response 201 Created
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "sku": "SKU-001",
   "name": "Laptop Pro",
   "price": 1299.99,
-  "currency": "USD"
+  "currency": "USD",
+  "stock": 50
 }
 ```
 
-#### Obtener por ID
+### Obtener por ID
+
 ```bash
 GET /products/{id}
-
-# Response (200 OK)
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "sku": "SKU-001",
-  "name": "Laptop Pro",
-  "price": 1299.99,
-  "currency": "USD"
-}
+# Response 200 OK — mismo formato que arriba
+# Response 404 si no existe
 ```
 
-#### Obtener por SKU
+### Obtener por SKU
+
 ```bash
 GET /products?sku=SKU-001
-
-# Response (200 OK)
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "sku": "SKU-001",
-  "name": "Laptop Pro",
-  "price": 1299.99,
-  "currency": "USD"
-}
+# Response 200 OK — mismo formato que arriba
+# Response 404 si no existe
 ```
 
-### Errores (Problem Details)
-```bash
-# Si SKU ya existe (409 Conflict)
-{
-  "status": 409,
-  "title": "Conflict",
-  "detail": "sku already exists"
-}
+### Health check
 
-# Si producto no encontrado (404 Not Found)
-{
-  "status": 404,
-  "title": "Not Found",
-  "detail": "product not found"
-}
+```bash
+GET /actuator/health
+# Response: {"status":"UP"}
+```
+
+### Documentación interactiva (Swagger)
+
+```
+http://localhost:8080/swagger-ui.html
+```
+
+### Errores
+
+```json
+// 409 Conflict — SKU duplicado
+{ "status": 409, "title": "Conflict", "detail": "sku already exists" }
+
+// 404 Not Found
+{ "status": 404, "title": "Not Found", "detail": "product not found" }
+
+// 400 Bad Request — validación
+{ "status": 400, "title": "Bad Request", "detail": "..." }
 ```
 
 ---
 
-## ✅ Tests
+## Tests
 
-### Ejecutar todos los tests
 ```bash
-# Windows
-.\mvnw.cmd test
-
-# Linux/Mac
+# Todos los tests (unitarios + arquitectura + integración)
+# Requiere Docker corriendo (TestContainers levanta PostgreSQL real)
 ./mvnw test
-```
 
-### Tests disponibles
+# Ciclo completo igual al pipeline CI (tests + formato + cobertura)
+./mvnw verify
 
-| Clase | Tests | Descripción |
-|-------|-------|-------------|
-| `GetProductServiceTest` | 4 | Unit tests: getById, getBySku, excepciones |
-| `CreateProductServiceTest` | 3 | Unit tests: crear producto, validar SKU único |
-| `ArchitectureTest` | 8 | Validar reglas Clean Architecture |
-| **TOTAL** | **15** | ✅ Todos pasando |
-
-### Ejecutar test específico
-```bash
-# Windows
-.\mvnw.cmd test -Dtest=GetProductServiceTest
-
-# Linux/Mac
+# Test específico
 ./mvnw test -Dtest=GetProductServiceTest
+./mvnw test -Dtest=CreateProductServiceTest#shouldCreateProductWhenSkuDoesNotExist
+
+# Reporte de cobertura (genera target/site/jacoco/index.html)
+./mvnw test jacoco:report
+
+# Corregir formato de código
+./mvnw spotless:apply
 ```
 
-### Cobertura (JaCoCo)
+### Clases de test
+
+| Clase | Tipo | Descripción |
+|-------|------|-------------|
+| `GetProductServiceTest` | Unit (Mockito) | getById, getBySku, excepciones |
+| `CreateProductServiceTest` | Unit (Mockito) | crear producto, SKU duplicado, UUID único |
+| `ArchitectureTest` | Arquitectura (ArchUnit) | 8 reglas de dependencias entre capas |
+| `ProductsControllerIntegrationTest` | Integración (TestContainers) | flujo completo HTTP → BD → respuesta |
+
+---
+
+## Arquitectura
+
+```
+com.acme.cicd.product/
+├── domain/          ← Java puro. Sin Spring, sin JPA. Solo records.
+├── application/     ← Casos de uso + interfaces de puertos (in/out)
+└── infrastructure/  ← Adaptadores: REST controller, JPA, config de beans
+```
+
+**Regla de dependencias (verificada por ArchUnit en cada build):**
+
+```
+infrastructure → application → domain
+```
+
+`domain` no conoce Spring. `application` no conoce JPA. Violaciones = test falla = CI falla = merge bloqueado.
+
+---
+
+## Migraciones de BD (Flyway)
+
+```
+src/main/resources/db/migration/
+├── V1__create_products.sql          ← Crea tabla products
+└── V2__add_stock_to_products.sql    ← Agrega columna stock
+```
+
+`hibernate.ddl-auto=none` — el schema NUNCA se genera automáticamente. Solo Flyway.
+
+---
+
+## Pipeline CI/CD
+
+```
+Push/PR → Stage CI → Stage CD (solo en main)
+```
+
+**Stage CI** (corre en PR y en push a main):
+- `./mvnw verify` → compila + tests + formato Spotless + cobertura JaCoCo (mín 70%)
+- Si falla → merge bloqueado en GitHub
+
+**Stage CD** (solo en merge a main):
+- Compila JAR
+- `docker compose build` → nueva imagen
+- `docker compose up -d` → reemplaza contenedores
+- `bash deploy/smoke.sh` → valida que la app responde
+
+**Branch Protection (`main`):**
+- Push directo bloqueado
+- PR obligatorio con 1 aprobación
+- Pipeline CI debe pasar antes de poder mergear
+
+---
+
+## Comandos útiles
+
 ```bash
-.\mvnw.cmd test jacoco:report
+# Compilar sin tests
+./mvnw clean package -DskipTests
 
-# Ver reporte en: target/site/jacoco/index.html
+# Docker Compose
+docker compose -f deploy/compose.yaml up -d --build   # Levantar
+docker compose -f deploy/compose.yaml down             # Detener
+docker compose -f deploy/compose.yaml down -v          # Detener + borrar BD
+docker compose -f deploy/compose.yaml logs -f app      # Ver logs
+
+# Smoke test manual
+bash deploy/smoke.sh
 ```
 
 ---
 
-## 🐳 Docker Compose
+## Variables de entorno
 
-### Servicios levantados
-
-| Servicio | Puerto | Usuario | Password |
-|----------|--------|---------|----------|
-| PostgreSQL | 5432 | app | app |
-| Spring Boot App | 8080 | - | - |
-
-### Variables de entorno (`.env`)
-```env
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=cicd_db
-DB_USER=app
-DB_PASS=app
-```
-
-### Comandos útiles
-```bash
-# Levantar en background
-docker compose -f deploy/compose.yaml up -d --build
-
-# Ver logs
-docker compose -f deploy/compose.yaml logs -f app
-
-# Detener
-docker compose -f deploy/compose.yaml down
-
-# Limpiar volúmenes (borra BD)
-docker compose -f deploy/compose.yaml down -v
-
-# Ejecutar comando en contenedor
-docker compose -f deploy/compose.yaml exec app ./mvnw test
-```
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `DB_HOST` | `localhost` | Host PostgreSQL |
+| `DB_PORT` | `5432` | Puerto PostgreSQL |
+| `DB_NAME` | `cicd_db` | Nombre de la BD |
+| `DB_USER` | `app` | Usuario |
+| `DB_PASS` | `app` | Contraseña |
 
 ---
 
-## 📋 CI/CD (Azure DevOps)
+## Estructura de archivos
 
-### Pipeline stages
-
-#### Stage 1: CI (ubuntu-latest)
-- Cache Maven
-- `./mvnw spotless:check` (validar formato)
-- `./mvnw test` (tests unitarios + architecture)
-- `./mvnw verify -PIT` (integration tests)
-- Publicar reportes JUnit + JaCoCo
-
-#### Stage 2: CD (self-hosted Linux)
-- Checkout código
-- `docker compose build`
-- `docker compose up -d`
-- Ejecutar smoke tests
-- Si falla: logs + rollback
-
-### Activar en Azure DevOps
-1. Crear proyecto en [dev.azure.com](https://dev.azure.com)
-2. Importar repo (GitHub)
-3. Crear pipeline → seleccionar `azure-pipelines.yml`
-4. Configurar self-hosted agent (si quieres CD)
-
----
-
-## 🏗️ Conceptos Implementados
-
-### Clean Architecture (3 capas)
 ```
-Domain (sin Spring/JPA)
-    ↓ (depende)
-Application (casos de uso, puertos)
-    ↓ (depende)
-Infrastructure (controllers, JPA, HTTP)
+.
+├── azure-pipelines.yml              # Pipeline CI/CD
+├── Dockerfile                       # Imagen: eclipse-temurin:21-jre
+├── pom.xml                          # Dependencias y plugins Maven
+├── mvnw                             # Maven Wrapper (no necesitas instalar Maven)
+├── deploy/
+│   ├── compose.yaml                 # PostgreSQL 16 + Spring Boot app
+│   └── smoke.sh                     # Smoke tests post-deploy
+└── src/
+    ├── main/
+    │   ├── java/com/acme/cicd/      # Código fuente
+    │   └── resources/
+    │       ├── application.yaml
+    │       └── db/migration/        # Migraciones Flyway
+    └── test/
+        └── java/com/acme/cicd/      # Tests
 ```
-
-**Regla:** Domain ≠ Spring, Application ≠ Infrastructure
-
-### SOLID
-- **S**ingle Responsibility: Cada servicio = 1 responsabilidad
-- **O**pen/Closed: Interfaces de puertos (productibles)
-- **L**iskov: Implementaciones intercambiables
-- **I**nterface Segregation: Puertos pequeños y específicos
-- **D**ependency Inversion: Inyección de puertos (interfaces)
-
-### Ports & Adapters (Hexagonal)
-```
-CreateProductUseCase (In-Port)
-    ↓
-CreateProductService (Implementación)
-    ↓
-ProductRepositoryPort (Out-Port)
-    ↓
-ProductPersistenceAdapter (Implementación JPA)
-```
-
----
-
-## 📝 Tecnologías
-
-| Stack | Versión |
-|-------|---------|
-| Java | 21 |
-| Spring Boot | 4.0.5 |
-| Maven | 3.9+ (via mvnw) |
-| PostgreSQL | 16 (Docker) |
-| Flyway | 9.x |
-| JUnit 5 | 5.9+ |
-| Mockito | 5.x |
-| ArchUnit | 1.4.1 |
-| Docker | 20.10+ |
-| Azure DevOps | Gratis |
-
----
-
-## 🔍 Troubleshooting
-
-### Error: "Puerto 5432 en uso"
-```bash
-# Matar proceso usando puerto 5432
-# Windows
-netstat -ano | findstr :5432
-taskkill /PID <PID> /F
-
-# Linux
-lsof -i :5432
-kill -9 <PID>
-
-# Docker
-docker compose down -v
-```
-
-### Error: "Database does not exist"
-```bash
-# Flyway no corrió. Verificar logs
-docker compose logs postgres
-docker compose logs app
-
-# Reintentar
-docker compose down -v
-docker compose up -d --build
-```
-
-### Tests fallan en CI/CD pero pasan local
-```bash
-# Asegurar Maven cache limpio
-.\mvnw.cmd clean test
-
-# Verificar JDK 21
-java -version
-
-# Ejecutar en Azure: misma versión de Java
-```
-
----
-
-## 📚 Referencias
-
-- [Clean Architecture - Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)
-- [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
-- [Spring Boot Official](https://spring.io/projects/spring-boot)
-- [ArchUnit Documentation](https://www.archunit.org/)
-- [Azure DevOps Free Tier](https://learn.microsoft.com/en-us/azure/devops/user-guide/what-is-azure-devops)
-
----
-
-## 📄 Licencia
-
-Este proyecto es educativo y está disponible bajo MIT License.
-
----
-
-## ✍️ Autores / Contribuidores
-
-- **Creador:** LoraDev10
-- **Última actualización:** 22 de Abril de 2026
-
----
-
-## 💬 Preguntas / Soporte
-
-Para dudas sobre:
-- **Arquitectura:** Ver [CONCEPTOS-ARQUITECTURA.md](CONCEPTOS-ARQUITECTURA.md)
-- **Tests:** Ver carpeta `src/test/`
-- **CI/CD:** Ver [azure-pipelines.yml](azure-pipelines.yml)
-
