@@ -5,5 +5,6 @@ import java.util.UUID;
 
 public interface GetProductUseCase {
   Product getById(UUID id);
+
   Product getBySku(String sku);
 }

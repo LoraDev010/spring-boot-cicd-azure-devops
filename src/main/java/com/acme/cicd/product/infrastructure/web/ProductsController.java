@@ -16,7 +16,8 @@ public class ProductsController {
   private final CreateProductUseCase createProductUseCase;
   private final GetProductUseCase getProductUseCase;
 
-  public ProductsController(CreateProductUseCase createProductUseCase, GetProductUseCase getProductUseCase) {
+  public ProductsController(
+      CreateProductUseCase createProductUseCase, GetProductUseCase getProductUseCase) {
     this.createProductUseCase = createProductUseCase;
     this.getProductUseCase = getProductUseCase;
   }
@@ -24,9 +25,10 @@ public class ProductsController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ProductResponse create(@RequestBody @Valid CreateProductRequest request) {
-    UUID id = createProductUseCase.create(
-      new CreateProductCommand(request.sku(), request.name(), request.price(), request.currency())
-    );
+    UUID id =
+        createProductUseCase.create(
+            new CreateProductCommand(
+                request.sku(), request.name(), request.price(), request.currency()));
     return toResponse(getProductUseCase.getById(id));
   }
 

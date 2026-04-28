@@ -64,7 +64,8 @@ class GetProductServiceTest {
   void shouldReturnProductWhenExistsBySku() {
     // Arrange
     String sku = "SKU-001";
-    Product product = new Product(UUID.randomUUID(), sku, "Laptop", new BigDecimal("999.99"), "USD");
+    Product product =
+        new Product(UUID.randomUUID(), sku, "Laptop", new BigDecimal("999.99"), "USD");
     when(repositoryPort.findBySku(sku)).thenReturn(Optional.of(product));
 
     // Act

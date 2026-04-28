@@ -16,12 +16,16 @@ public class CreateProductService implements CreateProductUseCase {
 
   @Override
   public UUID create(CreateProductCommand command) {
-    repository.findBySku(command.sku()).ifPresent(p -> {
-      throw new DuplicateSkuException("sku already exists");
-    });
+    repository
+        .findBySku(command.sku())
+        .ifPresent(
+            p -> {
+              throw new DuplicateSkuException("sku already exists");
+            });
 
     UUID id = UUID.randomUUID();
-    repository.save(Product.createNew(id, command.sku(), command.name(), command.price(), command.currency()));
+    repository.save(
+        Product.createNew(id, command.sku(), command.name(), command.price(), command.currency()));
     return id;
   }
 }

@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public interface ProductRepositoryPort {
   Optional<Product> findById(UUID id);
+
   Optional<Product> findBySku(String sku);
+
   Product save(Product product);
 }

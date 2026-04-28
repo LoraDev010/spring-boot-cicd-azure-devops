@@ -21,4 +21,3 @@ public class ProductUseCaseConfig {
     return new GetProductService(repository);
   }
 }
-

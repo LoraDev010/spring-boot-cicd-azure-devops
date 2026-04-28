@@ -5,11 +5,12 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "products", uniqueConstraints = @UniqueConstraint(name = "uq_products_sku", columnNames = "sku"))
+@Table(
+    name = "products",
+    uniqueConstraints = @UniqueConstraint(name = "uq_products_sku", columnNames = "sku"))
 public class ProductJpaEntity {
 
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   @Column(nullable = false, length = 64)
   private String sku;
@@ -33,9 +34,23 @@ public class ProductJpaEntity {
     this.currency = currency;
   }
 
-  public UUID getId() { return id; }
-  public String getSku() { return sku; }
-  public String getName() { return name; }
-  public BigDecimal getPrice() { return price; }
-  public String getCurrency() { return currency; }
+  public UUID getId() {
+    return id;
+  }
+
+  public String getSku() {
+    return sku;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public BigDecimal getPrice() {
+    return price;
+  }
+
+  public String getCurrency() {
+    return currency;
+  }
 }

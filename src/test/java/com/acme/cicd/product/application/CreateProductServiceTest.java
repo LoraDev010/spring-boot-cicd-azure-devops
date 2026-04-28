@@ -49,14 +49,14 @@ class CreateProductServiceTest {
 
     // Assert
     assertThat(productId).isNotNull();
-    
+
     // Verifica que se llamó a findBySku para validar
     verify(repositoryPort, times(1)).findBySku(sku);
-    
+
     // Verifica que se llamó a save una sola vez
     ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
     verify(repositoryPort, times(1)).save(productCaptor.capture());
-    
+
     Product savedProduct = productCaptor.getValue();
     assertThat(savedProduct.sku()).isEqualTo(sku);
     assertThat(savedProduct.name()).isEqualTo(name);
@@ -69,9 +69,11 @@ class CreateProductServiceTest {
   void shouldThrowExceptionWhenSkuAlreadyExists() {
     // Arrange
     String sku = "SKU-EXISTING";
-    Product existingProduct = new Product(UUID.randomUUID(), sku, "Old Product", new BigDecimal("100"), "USD");
-    
-    CreateProductCommand command = new CreateProductCommand(sku, "New Product", new BigDecimal("200"), "USD");
+    Product existingProduct =
+        new Product(UUID.randomUUID(), sku, "Old Product", new BigDecimal("100"), "USD");
+
+    CreateProductCommand command =
+        new CreateProductCommand(sku, "New Product", new BigDecimal("200"), "USD");
 
     when(repositoryPort.findBySku(sku)).thenReturn(Optional.of(existingProduct));
 
@@ -82,7 +84,7 @@ class CreateProductServiceTest {
 
     // Verifica que findBySku fue llamado
     verify(repositoryPort, times(1)).findBySku(sku);
-    
+
     // Verifica que NUNCA se llamó a save
     verify(repositoryPort, never()).save(any());
   }
@@ -91,8 +93,10 @@ class CreateProductServiceTest {
   @DisplayName("debería generar UUID único para cada producto")
   void shouldGenerateUniqueUuidForEachProduct() {
     // Arrange
-    CreateProductCommand command1 = new CreateProductCommand("SKU-1", "Product 1", new BigDecimal("100"), "USD");
-    CreateProductCommand command2 = new CreateProductCommand("SKU-2", "Product 2", new BigDecimal("200"), "USD");
+    CreateProductCommand command1 =
+        new CreateProductCommand("SKU-1", "Product 1", new BigDecimal("100"), "USD");
+    CreateProductCommand command2 =
+        new CreateProductCommand("SKU-2", "Product 2", new BigDecimal("200"), "USD");
 
     when(repositoryPort.findBySku(anyString())).thenReturn(Optional.empty());
 

@@ -15,11 +15,15 @@ public class GetProductService implements GetProductUseCase {
 
   @Override
   public Product getById(UUID id) {
-    return repository.findById(id).orElseThrow(() -> new ProductNotFoundException("product not found"));
+    return repository
+        .findById(id)
+        .orElseThrow(() -> new ProductNotFoundException("product not found"));
   }
 
   @Override
   public Product getBySku(String sku) {
-    return repository.findBySku(sku).orElseThrow(() -> new ProductNotFoundException("product not found"));
+    return repository
+        .findBySku(sku)
+        .orElseThrow(() -> new ProductNotFoundException("product not found"));
   }
 }
