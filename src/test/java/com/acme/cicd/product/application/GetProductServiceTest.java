@@ -33,7 +33,7 @@ class GetProductServiceTest {
   void shouldReturnProductWhenExistsById() {
     // Arrange
     UUID productId = UUID.randomUUID();
-    Product product = new Product(productId, "SKU-001", "Laptop", new BigDecimal("999.99"), "USD");
+    Product product = new Product(productId, "SKU-001", "Laptop", new BigDecimal("999.99"), "USD", 10);
     when(repositoryPort.findById(productId)).thenReturn(Optional.of(product));
 
     // Act
@@ -65,7 +65,7 @@ class GetProductServiceTest {
     // Arrange
     String sku = "SKU-001";
     Product product =
-        new Product(UUID.randomUUID(), sku, "Laptop", new BigDecimal("999.99"), "USD");
+        new Product(UUID.randomUUID(), sku, "Laptop", new BigDecimal("999.99"), "USD", 10);
     when(repositoryPort.findBySku(sku)).thenReturn(Optional.of(product));
 
     // Act

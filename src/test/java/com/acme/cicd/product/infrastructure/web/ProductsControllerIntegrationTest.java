@@ -38,7 +38,7 @@ class ProductsControllerIntegrationTest {
   void shouldCreateAndRetrieveProductUsingRestApi() {
     RestClient client = RestClient.create("http://localhost:" + port);
     CreateProductRequest request =
-        new CreateProductRequest("SKU-001", "Integration Product", new BigDecimal("15.00"), "USD");
+        new CreateProductRequest("SKU-001", "Integration Product", new BigDecimal("15.00"), "USD", 25);
 
     ResponseEntity<ProductResponse> createResponse =
         client
@@ -57,6 +57,7 @@ class ProductsControllerIntegrationTest {
     assertThat(created.name()).isEqualTo("Integration Product");
     assertThat(created.price()).isEqualByComparingTo("15.00");
     assertThat(created.currency()).isEqualTo("USD");
+    assertThat(created.stock()).isEqualTo(25);
 
     ProductResponse byId =
         client.get().uri("/products/{id}", created.id()).retrieve().body(ProductResponse.class);

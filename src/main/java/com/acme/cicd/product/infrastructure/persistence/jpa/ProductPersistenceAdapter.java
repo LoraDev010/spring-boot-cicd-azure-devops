@@ -32,10 +32,10 @@ public class ProductPersistenceAdapter implements ProductRepositoryPort {
   }
 
   private Product toDomain(ProductJpaEntity e) {
-    return Product.restore(e.getId(), e.getSku(), e.getName(), e.getPrice(), e.getCurrency());
+    return Product.restore(e.getId(), e.getSku(), e.getName(), e.getPrice(), e.getCurrency(), e.getStock());
   }
 
   private ProductJpaEntity toEntity(Product p) {
-    return new ProductJpaEntity(p.id(), p.sku(), p.name(), p.price(), p.currency());
+    return new ProductJpaEntity(p.id(), p.sku(), p.name(), p.price(), p.currency(), p.stock());
   }
 }

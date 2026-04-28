@@ -40,7 +40,7 @@ class CreateProductServiceTest {
     BigDecimal price = new BigDecimal("1299.99");
     String currency = "USD";
 
-    CreateProductCommand command = new CreateProductCommand(sku, name, price, currency);
+    CreateProductCommand command = new CreateProductCommand(sku, name, price, currency, 50);
 
     when(repositoryPort.findBySku(sku)).thenReturn(Optional.empty());
 
@@ -62,6 +62,7 @@ class CreateProductServiceTest {
     assertThat(savedProduct.name()).isEqualTo(name);
     assertThat(savedProduct.price()).isEqualByComparingTo(price);
     assertThat(savedProduct.currency()).isEqualTo(currency);
+    assertThat(savedProduct.stock()).isEqualTo(50);
   }
 
   @Test
@@ -70,10 +71,10 @@ class CreateProductServiceTest {
     // Arrange
     String sku = "SKU-EXISTING";
     Product existingProduct =
-        new Product(UUID.randomUUID(), sku, "Old Product", new BigDecimal("100"), "USD");
+        new Product(UUID.randomUUID(), sku, "Old Product", new BigDecimal("100"), "USD", 5);
 
     CreateProductCommand command =
-        new CreateProductCommand(sku, "New Product", new BigDecimal("200"), "USD");
+        new CreateProductCommand(sku, "New Product", new BigDecimal("200"), "USD", 10);
 
     when(repositoryPort.findBySku(sku)).thenReturn(Optional.of(existingProduct));
 
@@ -94,9 +95,9 @@ class CreateProductServiceTest {
   void shouldGenerateUniqueUuidForEachProduct() {
     // Arrange
     CreateProductCommand command1 =
-        new CreateProductCommand("SKU-1", "Product 1", new BigDecimal("100"), "USD");
+        new CreateProductCommand("SKU-1", "Product 1", new BigDecimal("100"), "USD", 10);
     CreateProductCommand command2 =
-        new CreateProductCommand("SKU-2", "Product 2", new BigDecimal("200"), "USD");
+        new CreateProductCommand("SKU-2", "Product 2", new BigDecimal("200"), "USD", 20);
 
     when(repositoryPort.findBySku(anyString())).thenReturn(Optional.empty());
 

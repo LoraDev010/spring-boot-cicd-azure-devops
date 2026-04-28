@@ -28,7 +28,7 @@ public class ProductsController {
     UUID id =
         createProductUseCase.create(
             new CreateProductCommand(
-                request.sku(), request.name(), request.price(), request.currency()));
+                request.sku(), request.name(), request.price(), request.currency(), request.stock()));
     return toResponse(getProductUseCase.getById(id));
   }
 
@@ -43,6 +43,6 @@ public class ProductsController {
   }
 
   private static ProductResponse toResponse(Product p) {
-    return new ProductResponse(p.id(), p.sku(), p.name(), p.price(), p.currency());
+    return new ProductResponse(p.id(), p.sku(), p.name(), p.price(), p.currency(), p.stock());
   }
 }

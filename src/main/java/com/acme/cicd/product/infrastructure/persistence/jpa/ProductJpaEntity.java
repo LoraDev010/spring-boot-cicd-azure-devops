@@ -24,14 +24,18 @@ public class ProductJpaEntity {
   @Column(nullable = false, length = 3)
   private String currency;
 
+  @Column(nullable = false)
+  private int stock;
+
   protected ProductJpaEntity() {}
 
-  public ProductJpaEntity(UUID id, String sku, String name, BigDecimal price, String currency) {
+  public ProductJpaEntity(UUID id, String sku, String name, BigDecimal price, String currency, int stock) {
     this.id = id;
     this.sku = sku;
     this.name = name;
     this.price = price;
     this.currency = currency;
+    this.stock = stock;
   }
 
   public UUID getId() {
@@ -52,5 +56,9 @@ public class ProductJpaEntity {
 
   public String getCurrency() {
     return currency;
+  }
+
+  public int getStock() {
+    return stock;
   }
 }
