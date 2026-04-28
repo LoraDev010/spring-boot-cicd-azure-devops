@@ -23,8 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class ProductsControllerIntegrationTest {
 
-  @Container
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
+  @Container static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
