@@ -160,6 +160,12 @@
 						<TESTCONTAINERS_DOCKER_CLIENT_STRATEGY>org.testcontainers.dockerclient.UnixSocketClientProviderStrategy</TESTCONTAINERS_DOCKER_CLIENT_STRATEGY>
 						<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
 					</environmentVariables>
+					<systemPropertyVariables>
+						<DOCKER_HOST>unix:///var/run/docker.sock</DOCKER_HOST>
+						<DOCKER_API_VERSION>1.46</DOCKER_API_VERSION>
+						<TESTCONTAINERS_DOCKER_CLIENT_STRATEGY>org.testcontainers.dockerclient.UnixSocketClientProviderStrategy</TESTCONTAINERS_DOCKER_CLIENT_STRATEGY>
+						<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 
