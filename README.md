@@ -476,3 +476,4 @@ Para dudas sobre:
 - **Arquitectura:** Ver [CONCEPTOS-ARQUITECTURA.md](CONCEPTOS-ARQUITECTURA.md)
 - **Tests:** Ver carpeta `src/test/`
 - **CI/CD:** Ver [azure-pipelines.yml](azure-pipelines.yml)
+
