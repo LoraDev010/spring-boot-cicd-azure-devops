@@ -38,7 +38,8 @@ class ProductsControllerIntegrationTest {
   void shouldCreateAndRetrieveProductUsingRestApi() {
     RestClient client = RestClient.create("http://localhost:" + port);
     CreateProductRequest request =
-        new CreateProductRequest("SKU-001", "Integration Product", new BigDecimal("15.00"), "USD", 25);
+        new CreateProductRequest(
+            "SKU-001", "Integration Product", new BigDecimal("15.00"), "USD", 25);
 
     ResponseEntity<ProductResponse> createResponse =
         client

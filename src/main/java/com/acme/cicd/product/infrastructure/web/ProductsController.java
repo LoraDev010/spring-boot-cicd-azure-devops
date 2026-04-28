@@ -28,7 +28,11 @@ public class ProductsController {
     UUID id =
         createProductUseCase.create(
             new CreateProductCommand(
-                request.sku(), request.name(), request.price(), request.currency(), request.stock()));
+                request.sku(),
+                request.name(),
+                request.price(),
+                request.currency(),
+                request.stock()));
     return toResponse(getProductUseCase.getById(id));
   }
 

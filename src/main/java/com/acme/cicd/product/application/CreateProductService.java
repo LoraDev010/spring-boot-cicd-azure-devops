@@ -25,7 +25,13 @@ public class CreateProductService implements CreateProductUseCase {
 
     UUID id = UUID.randomUUID();
     repository.save(
-        Product.createNew(id, command.sku(), command.name(), command.price(), command.currency(), command.stock()));
+        Product.createNew(
+            id,
+            command.sku(),
+            command.name(),
+            command.price(),
+            command.currency(),
+            command.stock()));
     return id;
   }
 }

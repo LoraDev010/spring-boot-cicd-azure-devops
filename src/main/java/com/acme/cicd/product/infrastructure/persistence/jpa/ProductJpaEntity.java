@@ -29,7 +29,8 @@ public class ProductJpaEntity {
 
   protected ProductJpaEntity() {}
 
-  public ProductJpaEntity(UUID id, String sku, String name, BigDecimal price, String currency, int stock) {
+  public ProductJpaEntity(
+      UUID id, String sku, String name, BigDecimal price, String currency, int stock) {
     this.id = id;
     this.sku = sku;
     this.name = name;
