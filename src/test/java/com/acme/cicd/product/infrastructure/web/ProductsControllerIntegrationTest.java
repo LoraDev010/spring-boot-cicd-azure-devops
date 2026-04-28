@@ -10,25 +10,37 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestClient;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = Application.class)
-@ActiveProfiles("test")
+@Testcontainers
 class ProductsControllerIntegrationTest {
+
+  @Container
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
+
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    registry.add("spring.datasource.username", postgres::getUsername);
+    registry.add("spring.datasource.password", postgres::getPassword);
+  }
 
   @LocalServerPort int port;
 
   @Test
   void shouldCreateAndRetrieveProductUsingRestApi() {
     RestClient client = RestClient.create("http://localhost:" + port);
-
     CreateProductRequest request =
         new CreateProductRequest("SKU-001", "Integration Product", new BigDecimal("15.00"), "USD");
 
-    // Create product
     ResponseEntity<ProductResponse> createResponse =
         client
             .post()
@@ -47,12 +59,10 @@ class ProductsControllerIntegrationTest {
     assertThat(created.price()).isEqualByComparingTo("15.00");
     assertThat(created.currency()).isEqualTo("USD");
 
-    // Get by ID
     ProductResponse byId =
         client.get().uri("/products/{id}", created.id()).retrieve().body(ProductResponse.class);
     assertThat(byId).isEqualTo(created);
 
-    // Get by SKU
     ProductResponse bySku =
         client
             .get()
